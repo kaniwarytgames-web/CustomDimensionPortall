@@ -1,1 +1,39 @@
+name: Build Minecraft Mod
 
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          unzip -o CustomDimensionPortal-1.21.10-GITHUB-READY.zip -d project
+          cd project
+          find . -maxdepth 2 -type f | head -50
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Build
+        working-directory: project
+        run: |
+          chmod +x gradlew
+          ./gradlew build --no-daemon
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: CustomDimensionPortal
+          path: project/build/libs/*.jar
